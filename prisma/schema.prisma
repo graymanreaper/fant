@@ -1,0 +1,71 @@
+// Data model migrated from the Microsoft Access database.
+// Target database: Azure SQL Database (SQL Server).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+/// Members / shareholders. Mirrors the Access "Investors" table.
+model Investor {
+  /// Sequential primary key. Assigned as max(InvestorKey) + 1 on create,
+  /// matching the Access "ChangeBlankKey" behaviour.
+  investorKey      Int     @id @map("InvestorKey")
+  investorName     String  @map("InvestorName") @db.NVarChar(200)
+  investorAltName  String? @map("InvestorAltName") @db.NVarChar(200)
+  investorAddress1 String? @map("InvestorAddress1") @db.NVarChar(300)
+  investorCity     String? @map("InvestorCity") @db.NVarChar(100)
+  investorState    String? @map("InvestorState") @db.NVarChar(2)
+  investorPostCode String? @map("InvestorPostCode") @db.NVarChar(20)
+  investorCountry  String? @map("InvestorCountry") @db.NVarChar(100)
+  investorEmail    String? @map("InvestorEmail") @db.NVarChar(200)
+  investorEIN      String? @map("InvestorEIN") @db.NVarChar(20)
+  investorPhone1   String? @map("InvestorPhone1") @db.NVarChar(40)
+  investorPhone2   String? @map("InvestorPhone2") @db.NVarChar(40)
+
+  treasury         Boolean @default(false) @map("Treasury")
+  founder          Boolean @default(false) @map("Founder")
+  boardOfManagers  Boolean @default(false) @map("BoardOfManagers")
+  officer          Boolean @default(false) @map("Officer")
+  formerOfficer    Boolean @default(false) @map("FormerOfficer")
+  repettiAffiliate Boolean @default(false) @map("RepettiAffiliate")
+  inactive         Boolean @default(false) @map("Inactive")
+
+  investorNotes    String? @map("InvestorNotes") @db.NVarChar(Max)
+
+  ledgerEntries    LedgerEntry[]
+
+  @@map("Investors")
+}
+
+/// Stock ledger. Mirrors the Access "LedgerEntries" table.
+/// Every transaction is double-entry: shares added to one investor are
+/// subtracted from another, and both rows share the same TransactionKey.
+model LedgerEntry {
+  ledgerEntryKey           Int      @id @default(autoincrement()) @map("LedgerEntryKey")
+  ledgerEntryDate          DateTime @map("LedgerEntryDate") @db.Date
+  investorKey              Int      @map("InvestorKey")
+  /// e.g. "Sale_2026-08-28-1" (date plus sale-of-the-day sequence).
+  transactionKey           String   @map("TransactionKey") @db.NVarChar(60)
+  /// "A" or "B".
+  unitType                 String   @map("UnitType") @db.NVarChar(1)
+  /// "1st" or "2nd".
+  unitSubType              String   @map("UnitSubType") @db.NVarChar(10)
+  amount                   Decimal  @map("Amount") @db.Decimal(19, 4)
+  originalIssuance         Boolean  @default(false) @map("OriginalIssuance")
+  /// Share count; positive for additions, negative for the offsetting entry.
+  quantity                 Int      @map("Quantity")
+  notes                    String?  @map("Notes") @db.NVarChar(Max)
+  /// Set to the TransactionKey this entry reverses, if any.
+  reversalOfTransactionKey String?  @map("ReversalOfTransactionKey") @db.NVarChar(60)
+
+  investor                 Investor @relation(fields: [investorKey], references: [investorKey])
+
+  @@index([investorKey])
+  @@index([transactionKey])
+  @@map("LedgerEntries")
+}

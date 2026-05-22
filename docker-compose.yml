@@ -1,0 +1,16 @@
+# Local development database only. Production uses Azure SQL Database.
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fant-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "FantLocal!2026"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - fant-db-data:/var/opt/mssql
+
+volumes:
+  fant-db-data:

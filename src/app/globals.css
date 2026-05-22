@@ -1,0 +1,403 @@
+:root {
+  --bg: #eef1f5;
+  --panel: #ffffff;
+  --ink: #1a2330;
+  --muted: #5b6675;
+  --line: #d4dae2;
+  --brand: #1f3a5f;
+  --brand-ink: #ffffff;
+  --accent: #2f6db3;
+  --danger: #b3261e;
+  --ok: #1f7a4d;
+  --field-bg: #fbfcfe;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+a {
+  color: var(--accent);
+}
+
+/* ---- Layout ------------------------------------------------------------ */
+.app-header {
+  background: var(--brand);
+  color: var(--brand-ink);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-header .brand {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.app-header nav {
+  display: flex;
+  gap: 16px;
+}
+
+.app-header nav a {
+  color: var(--brand-ink);
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+.app-header nav a:hover {
+  opacity: 1;
+}
+
+.app-header .spacer {
+  flex: 1;
+}
+
+.app-header .user {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.linkbutton {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--brand-ink);
+  opacity: 0.85;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.linkbutton:hover {
+  opacity: 1;
+}
+
+main {
+  max-width: 1040px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+/* ---- Card -------------------------------------------------------------- */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(20, 30, 45, 0.06);
+}
+
+.card + .card {
+  margin-top: 18px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--brand);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+}
+
+/* ---- Forms ------------------------------------------------------------- */
+.investor-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 28px;
+}
+
+@media (max-width: 760px) {
+  .investor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.field label {
+  color: var(--muted);
+  font-weight: 600;
+  text-align: right;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--field-bg);
+  font: inherit;
+  color: var(--ink);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.field .readonly {
+  font-weight: 700;
+  padding: 6px 8px;
+}
+
+.checkbox-panel {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: var(--field-bg);
+  height: fit-content;
+}
+
+.checkbox-panel h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.checkbox-row input {
+  width: 16px;
+  height: 16px;
+}
+
+.checkbox-row label {
+  font-weight: 600;
+}
+
+.notes-block {
+  margin-top: 18px;
+}
+
+.notes-block label {
+  display: block;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.notes-block textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--field-bg);
+  font: inherit;
+  resize: vertical;
+}
+
+/* ---- Buttons ----------------------------------------------------------- */
+.button-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #f1f4f8;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #e6ebf2;
+}
+
+.btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+
+.btn-primary:hover {
+  background: #16304f;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- Messages ---------------------------------------------------------- */
+.alert {
+  padding: 9px 12px;
+  border-radius: 5px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.alert-error {
+  background: #fce8e6;
+  color: var(--danger);
+  border: 1px solid #f3b9b4;
+}
+
+.alert-ok {
+  background: #e6f4ec;
+  color: var(--ok);
+  border: 1px solid #aed8c0;
+}
+
+/* ---- Tables ------------------------------------------------------------ */
+table.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+table.grid th,
+table.grid td {
+  border: 1px solid var(--line);
+  padding: 6px 9px;
+  text-align: left;
+}
+
+table.grid th {
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+
+table.grid tbody tr:nth-child(even) {
+  background: #f6f8fb;
+}
+
+table.grid td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.neg {
+  color: var(--danger);
+}
+
+.pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pill-inactive {
+  background: #fce8e6;
+  color: var(--danger);
+}
+
+.pill-active {
+  background: #e6f4ec;
+  color: var(--ok);
+}
+
+/* ---- Search ------------------------------------------------------------ */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font: inherit;
+}
+
+.result-link {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.balance {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.balance strong {
+  color: var(--ink);
+}
+
+/* ---- Print ------------------------------------------------------------- */
+.print-actions {
+  margin-bottom: 16px;
+}
+
+@media print {
+  .app-header,
+  .print-actions,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  main {
+    margin: 0;
+    max-width: none;
+  }
+
+  .card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}
