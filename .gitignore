@@ -27,5 +27,9 @@ yarn-error.log*
 # prisma
 /prisma/*.db
 
+# imported source data (may contain personal data)
+/data/*
+!/data/.gitkeep
+
 # typescript
 *.tsbuildinfo

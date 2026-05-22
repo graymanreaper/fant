@@ -72,12 +72,28 @@ docker exec fant-db /opt/mssql-tools18/bin/sqlcmd \
   -Q "IF DB_ID('fant') IS NULL CREATE DATABASE fant;"
 npm run db:push
 
-# 5. Load sample data (optional)
+# 5. Load data
+#    Either sample data for a quick look:
 npm run db:seed
+#    ...or import the real Access tables (see "Importing Access data" below):
+npm run db:import
 
 # 6. Run the app
 npm run dev
 ```
+
+## Importing Access data
+
+Export both Access tables to Excel and import them in one step:
+
+1. In Access, open the **Investors** table, then
+   **External Data → Export → Excel**. Save it as `data/Investors.xlsx`
+   inside this project. Repeat for **LedgerEntries** → `data/LedgerEntries.xlsx`.
+2. Run `npm run db:import`. Columns are matched by header name, so column
+   order does not matter, and the old `LedgerEntry` id column is ignored
+   (the database assigns its own). `InvestorKey` values are preserved.
+3. The import **replaces all existing data**. On a database that already
+   has rows, run `npm run db:import -- --force`.
 
 Open http://localhost:3000. With the Entra ID variables left blank, sign-in is
 bypassed for local development.
