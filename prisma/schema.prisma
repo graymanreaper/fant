@@ -47,15 +47,17 @@ model Investor {
 /// subtracted from another, and both rows share the same TransactionKey.
 model LedgerEntry {
   ledgerEntryKey           Int      @id @default(autoincrement()) @map("LedgerEntryKey")
-  ledgerEntryDate          DateTime @map("LedgerEntryDate") @db.Date
+  /// Full datetime: an estimated date is stored at 23:59 (Access convention).
+  ledgerEntryDate          DateTime @map("LedgerEntryDate")
   investorKey              Int      @map("InvestorKey")
-  /// e.g. "Sale_2026-08-28-1" (date plus sale-of-the-day sequence).
+  /// e.g. "Sale_2026-08-28_1" (type prefix, date, sequence of the day).
   transactionKey           String   @map("TransactionKey") @db.NVarChar(60)
   /// "A" or "B".
   unitType                 String   @map("UnitType") @db.NVarChar(1)
-  /// "1st" or "2nd".
-  unitSubType              String   @map("UnitSubType") @db.NVarChar(10)
-  amount                   Decimal  @map("Amount") @db.Decimal(19, 4)
+  /// "1st" or "2nd"; only set for subscription transactions.
+  unitSubType              String?  @map("UnitSubType") @db.NVarChar(10)
+  /// Only set for subscription transactions (the purchase price).
+  amount                   Decimal? @map("Amount") @db.Decimal(19, 4)
   originalIssuance         Boolean  @default(false) @map("OriginalIssuance")
   /// Share count; positive for additions, negative for the offsetting entry.
   quantity                 Int      @map("Quantity")

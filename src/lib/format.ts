@@ -11,10 +11,11 @@ export function formatDate(value: Date | string | null | undefined): string {
   return `${mm}/${dd}/${yyyy}`;
 }
 
-/** Format a number as US currency with cents. */
+/** Format a number as US currency with cents. Blank for null/undefined. */
 export function formatCurrency(value: number | string | null | undefined): string {
-  const n = typeof value === "string" ? Number(value) : value ?? 0;
-  if (n === null || n === undefined || Number.isNaN(n)) return "";
+  if (value === null || value === undefined || value === "") return "";
+  const n = typeof value === "string" ? Number(value) : value;
+  if (Number.isNaN(n)) return "";
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 

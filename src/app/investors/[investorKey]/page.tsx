@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   getInvestor,
   getInvestorLedger,
@@ -61,7 +62,15 @@ export default async function InvestorDetailPage({
               {ledger.map((entry) => (
                 <tr key={entry.ledgerEntryKey}>
                   <td>{formatDate(entry.ledgerEntryDate)}</td>
-                  <td>{entry.transactionKey}</td>
+                  <td>
+                    <Link
+                      href={`/transactions/${encodeURIComponent(
+                        entry.transactionKey,
+                      )}`}
+                    >
+                      {entry.transactionKey}
+                    </Link>
+                  </td>
                   <td>{entry.unitType}</td>
                   <td>{entry.unitSubType}</td>
                   <td className="num">{formatCurrency(entry.amount)}</td>

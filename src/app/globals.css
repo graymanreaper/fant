@@ -374,6 +374,56 @@ table.grid td.num {
   color: var(--ink);
 }
 
+/* ---- Transaction wizard ------------------------------------------------ */
+.field input[type="checkbox"] {
+  width: auto;
+}
+
+.addrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.addrow-title {
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 120px;
+}
+
+.addrow select,
+.addrow input {
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--field-bg);
+  font: inherit;
+  color: var(--ink);
+}
+
+.addrow select {
+  min-width: 220px;
+}
+
+.addrow input[type="number"] {
+  width: 140px;
+}
+
+.balance-status {
+  margin: 12px 0 0;
+  font-weight: 700;
+}
+
+.balance-status.ok {
+  color: var(--ok);
+}
+
+.balance-status.bad {
+  color: var(--danger);
+}
+
 /* ---- Print ------------------------------------------------------------- */
 .print-actions {
   margin-bottom: 16px;

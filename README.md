@@ -34,7 +34,22 @@ actions.
 - **Inactive rule** — a member cannot be marked Inactive while their unit
   balance is non-zero, matching the Access `InactiveCheck` validation.
 
-The `LedgerEntries` editing UI is not part of this first increment.
+### Transactions (the ledger)
+
+- **Transaction list** (`/transactions`) — browse/search every transaction
+  grouped by `TransactionKey`.
+- **Transaction wizard** (`/transactions/new`) — posts a balanced double-entry
+  transaction, the equivalent of the Access `LedgerEntryWizard`. Supports the
+  three transaction types (Sale, Grant, Subscription) with the matching field
+  layout, auto-generated transaction keys, default notes, balance checking,
+  and the "seller must hold enough units" rule (`CheckUnitAmt`).
+- **Transaction record** (`/transactions/[key]`) — view a transaction's ledger
+  entries with three actions, matching the Access ledger entry form:
+  - **Open Ledger Report** — a printable transaction report.
+  - **Reverse Transaction** — posts offsetting `*_REV` entries; blocked if the
+    transaction was already reversed.
+  - **Delete (Zero Out)** — soft-deletes by zeroing quantities/amounts and
+    annotating the notes (`DelLedgerEntry`).
 
 ## Local development
 
@@ -86,10 +101,13 @@ bypassed for local development.
 ```
 prisma/schema.prisma              Investor + LedgerEntry data model
 prisma/seed.ts                    Sample data
-src/auth.ts                       Auth.js / Entra ID configuration
-src/lib/investors.ts              Investor & ledger data access
-src/lib/excel.ts                  "Excel Member" workbook builder
-src/app/investors/                Search, record, new-member, print pages
-src/app/api/investors/            REST endpoints
-src/components/InvestorForm.tsx   The editable Investor form
+src/auth.ts                          Auth.js / Entra ID configuration
+src/lib/investors.ts                 Investor & ledger data access
+src/lib/transactions.ts              Transaction posting, reversal, delete
+src/lib/excel.ts                     "Excel Member" workbook builder
+src/app/investors/                   Investor search, record, print pages
+src/app/transactions/                Transaction list, wizard, record, print
+src/app/api/                         REST endpoints
+src/components/InvestorForm.tsx      The editable Investor form
+src/components/TransactionWizard.tsx The transaction posting wizard
 ```

@@ -23,6 +23,8 @@ export default async function RootLayout({
           <nav>
             <Link href="/investors">Investors</Link>
             <Link href="/investors/new">New Member</Link>
+            <Link href="/transactions">Transactions</Link>
+            <Link href="/transactions/new">New Transaction</Link>
           </nav>
           <span className="spacer" />
           {session?.user ? (

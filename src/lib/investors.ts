@@ -40,8 +40,8 @@ export interface LedgerEntryDTO {
   investorKey: number;
   transactionKey: string;
   unitType: string;
-  unitSubType: string;
-  amount: number;
+  unitSubType: string | null;
+  amount: number | null;
   originalIssuance: boolean;
   quantity: number;
   notes: string | null;
@@ -97,7 +97,7 @@ function toLedgerDTO(row: LedgerRow): LedgerEntryDTO {
     transactionKey: row.transactionKey,
     unitType: row.unitType,
     unitSubType: row.unitSubType,
-    amount: Number(row.amount),
+    amount: row.amount === null ? null : Number(row.amount),
     originalIssuance: row.originalIssuance,
     quantity: row.quantity,
     notes: row.notes,
