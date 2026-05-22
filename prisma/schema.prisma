@@ -2,7 +2,10 @@
 // Target database: Azure SQL Database (SQL Server).
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" covers local development; the Debian target covers the
+  // Azure App Service (Linux) runtime.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
