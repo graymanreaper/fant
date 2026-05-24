@@ -36,8 +36,10 @@ jobs:
           # Force-include Prisma's generated client + native engine.
           mkdir -p .next/standalone/node_modules/.prisma
           cp -r node_modules/.prisma/. .next/standalone/node_modules/.prisma/
-          # npm start -> the standalone server.js, bound to all interfaces.
-          node -e "const fs=require('fs');const p=require('./.next/standalone/package.json');p.scripts=Object.assign(p.scripts||{},{start:'HOSTNAME=0.0.0.0 node server.js'});fs.writeFileSync('./.next/standalone/package.json',JSON.stringify(p,null,2));"
+          # npm start -> the standalone server.js. Next.js 15 already binds
+          # to 0.0.0.0 by default; don't set HOSTNAME so NextAuth never
+          # picks it up as a canonical host.
+          node -e "const fs=require('fs');const p=require('./.next/standalone/package.json');p.scripts=Object.assign(p.scripts||{},{start:'node server.js'});fs.writeFileSync('./.next/standalone/package.json',JSON.stringify(p,null,2));"
 
       - name: Zip standalone bundle
         run: cd .next/standalone && zip -r ../../release.zip .
