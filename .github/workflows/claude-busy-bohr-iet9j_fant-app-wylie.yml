@@ -29,6 +29,11 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      - name: Pack node_modules into a tarball (preserves symlinks for App Service)
+        run: |
+          tar -czf node_modules.tar.gz node_modules
+          rm -rf node_modules
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
