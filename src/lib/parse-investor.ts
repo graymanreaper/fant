@@ -27,8 +27,8 @@ export function parseInvestorInput(body: unknown): ParseResult {
   }
 
   const state = str(b.investorState);
-  if (state && state.length !== 2) {
-    return { ok: false, error: "State must be a two-letter code." };
+  if (state && state.length > 100) {
+    return { ok: false, error: "State is too long (max 100 characters)." };
   }
 
   return {
@@ -38,7 +38,7 @@ export function parseInvestorInput(body: unknown): ParseResult {
       investorAltName: str(b.investorAltName),
       investorAddress1: str(b.investorAddress1),
       investorCity: str(b.investorCity),
-      investorState: state ? state.toUpperCase() : null,
+      investorState: state,
       investorPostCode: str(b.investorPostCode),
       investorCountry: str(b.investorCountry),
       investorEmail: str(b.investorEmail),
