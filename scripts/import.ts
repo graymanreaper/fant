@@ -218,7 +218,7 @@ async function main() {
       investorAltName: fit(asString(get(row, "InvestorAltName")), 200, "InvestorAltName", rowNum),
       investorAddress1: fit(asString(get(row, "InvestorAddress1")), 300, "InvestorAddress1", rowNum),
       investorCity: fit(asString(get(row, "InvestorCity")), 100, "InvestorCity", rowNum),
-      investorState: fit(asString(get(row, "InvestorState")), 2, "InvestorState", rowNum),
+      investorState: fit(asString(get(row, "InvestorState")), 100, "InvestorState", rowNum),
       investorPostCode: fit(asString(get(row, "InvestorPostCode")), 20, "InvestorPostCode", rowNum),
       investorCountry: fit(asString(get(row, "InvestorCountry")), 100, "InvestorCountry", rowNum),
       investorEmail: fit(asString(get(row, "InvestorEmail")), 200, "InvestorEmail", rowNum),
