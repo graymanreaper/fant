@@ -196,86 +196,167 @@ async function main() {
   const ledgerRows = await readSheet("LedgerEntries.xlsx");
   console.log(`  ${ledgerRows.length} ledger row(s).`);
 
-  // -- Map investors --------------------------------------------------------
-  const seenKeys = new Set<number>();
-  const investors = investorRows.map((row, index) => {
-    const rowNum = index + 2;
-    const investorKey = asInt(get(row, "InvestorKey"), "InvestorKey", rowNum);
-    if (seenKeys.has(investorKey)) {
-      throw new Error(
-        `Investors row ${rowNum}: duplicate InvestorKey ${investorKey}.`,
+  const errors: string[] = [];
+
+  // Every InvestorKey listed in Investors.xlsx, even if the row failed
+  // validation. Using this for the ref-check means a blank name doesn't
+  // *also* trigger "not found" errors on every ledger entry.
+  const declaredInvestorKeys = new Set<number>();
+  for (const [index, row] of investorRows.entries()) {
+    try {
+      declaredInvestorKeys.add(
+        asInt(get(row, "InvestorKey"), "InvestorKey", index + 2),
       );
+    } catch {
+      // reported by the main pass below
     }
-    seenKeys.add(investorKey);
-    return {
-      investorKey,
-      investorName: fit(
-        requireString(get(row, "InvestorName"), "InvestorName", rowNum),
-        200,
-        "InvestorName",
-        rowNum,
-      )!,
-      investorAltName: fit(asString(get(row, "InvestorAltName")), 200, "InvestorAltName", rowNum),
-      investorAddress1: fit(asString(get(row, "InvestorAddress1")), 300, "InvestorAddress1", rowNum),
-      investorCity: fit(asString(get(row, "InvestorCity")), 100, "InvestorCity", rowNum),
-      investorState: fit(asString(get(row, "InvestorState")), 100, "InvestorState", rowNum),
-      investorPostCode: fit(asString(get(row, "InvestorPostCode")), 20, "InvestorPostCode", rowNum),
-      investorCountry: fit(asString(get(row, "InvestorCountry")), 100, "InvestorCountry", rowNum),
-      investorEmail: fit(asString(get(row, "InvestorEmail")), 200, "InvestorEmail", rowNum),
-      investorEIN: fit(asString(get(row, "InvestorEIN")), 20, "InvestorEIN", rowNum),
-      investorPhone1: fit(asString(get(row, "InvestorPhone1")), 40, "InvestorPhone1", rowNum),
-      investorPhone2: fit(asString(get(row, "InvestorPhone2")), 40, "InvestorPhone2", rowNum),
-      treasury: asBool(get(row, "Treasury")),
-      founder: asBool(get(row, "Founder")),
-      boardOfManagers: asBool(get(row, "BoardOfManagers")),
-      officer: asBool(get(row, "Officer")),
-      formerOfficer: asBool(get(row, "FormerOfficer")),
-      repettiAffiliate: asBool(get(row, "RepettiAffiliate")),
-      inactive: asBool(get(row, "Inactive")),
-      investorNotes: asString(get(row, "InvestorNotes")),
-    };
+  }
+
+  // -- Map investors --------------------------------------------------------
+  type InvestorRecord = {
+    investorKey: number;
+    investorName: string;
+    investorAltName: string | null;
+    investorAddress1: string | null;
+    investorCity: string | null;
+    investorState: string | null;
+    investorPostCode: string | null;
+    investorCountry: string | null;
+    investorEmail: string | null;
+    investorEIN: string | null;
+    investorPhone1: string | null;
+    investorPhone2: string | null;
+    treasury: boolean;
+    founder: boolean;
+    boardOfManagers: boolean;
+    officer: boolean;
+    formerOfficer: boolean;
+    repettiAffiliate: boolean;
+    inactive: boolean;
+    investorNotes: string | null;
+  };
+
+  const seenKeys = new Set<number>();
+  const investors: InvestorRecord[] = [];
+
+  investorRows.forEach((row, index) => {
+    const rowNum = index + 2;
+    try {
+      const investorKey = asInt(get(row, "InvestorKey"), "InvestorKey", rowNum);
+      if (seenKeys.has(investorKey)) {
+        errors.push(
+          `Investors row ${rowNum}: duplicate InvestorKey ${investorKey}.`,
+        );
+        return;
+      }
+      const record: InvestorRecord = {
+        investorKey,
+        investorName: fit(
+          requireString(get(row, "InvestorName"), "InvestorName", rowNum),
+          200,
+          "InvestorName",
+          rowNum,
+        )!,
+        investorAltName: fit(asString(get(row, "InvestorAltName")), 200, "InvestorAltName", rowNum),
+        investorAddress1: fit(asString(get(row, "InvestorAddress1")), 300, "InvestorAddress1", rowNum),
+        investorCity: fit(asString(get(row, "InvestorCity")), 100, "InvestorCity", rowNum),
+        investorState: fit(asString(get(row, "InvestorState")), 100, "InvestorState", rowNum),
+        investorPostCode: fit(asString(get(row, "InvestorPostCode")), 20, "InvestorPostCode", rowNum),
+        investorCountry: fit(asString(get(row, "InvestorCountry")), 100, "InvestorCountry", rowNum),
+        investorEmail: fit(asString(get(row, "InvestorEmail")), 200, "InvestorEmail", rowNum),
+        investorEIN: fit(asString(get(row, "InvestorEIN")), 20, "InvestorEIN", rowNum),
+        investorPhone1: fit(asString(get(row, "InvestorPhone1")), 40, "InvestorPhone1", rowNum),
+        investorPhone2: fit(asString(get(row, "InvestorPhone2")), 40, "InvestorPhone2", rowNum),
+        treasury: asBool(get(row, "Treasury")),
+        founder: asBool(get(row, "Founder")),
+        boardOfManagers: asBool(get(row, "BoardOfManagers")),
+        officer: asBool(get(row, "Officer")),
+        formerOfficer: asBool(get(row, "FormerOfficer")),
+        repettiAffiliate: asBool(get(row, "RepettiAffiliate")),
+        inactive: asBool(get(row, "Inactive")),
+        investorNotes: asString(get(row, "InvestorNotes")),
+      };
+      seenKeys.add(investorKey);
+      investors.push(record);
+    } catch (e) {
+      errors.push((e as Error).message);
+    }
   });
 
   // -- Map ledger entries ---------------------------------------------------
-  const ledger = ledgerRows.map((row, index) => {
+  type LedgerRecord = {
+    ledgerEntryDate: Date;
+    investorKey: number;
+    transactionKey: string;
+    unitType: string;
+    unitSubType: string | null;
+    amount: number | null;
+    originalIssuance: boolean;
+    quantity: number;
+    notes: string | null;
+    reversalOfTransactionKey: string | null;
+  };
+
+  const ledger: LedgerRecord[] = [];
+
+  ledgerRows.forEach((row, index) => {
     const rowNum = index + 2;
-    return {
-      ledgerEntryDate: asDate(get(row, "LedgerEntryDate"), "LedgerEntryDate", rowNum),
-      investorKey: asInt(get(row, "InvestorKey"), "InvestorKey", rowNum),
-      transactionKey: fit(
-        requireString(get(row, "TransactionKey"), "TransactionKey", rowNum),
-        60,
-        "TransactionKey",
-        rowNum,
-      )!,
-      unitType: fit(
-        requireString(get(row, "UnitType"), "UnitType", rowNum),
-        1,
-        "UnitType",
-        rowNum,
-      )!,
-      unitSubType: fit(asString(get(row, "UnitSubType")), 10, "UnitSubType", rowNum),
-      amount: asMoneyOrNull(get(row, "Amount")),
-      originalIssuance: asBool(get(row, "OriginalIssuance")),
-      quantity: asInt(get(row, "Quantity"), "Quantity", rowNum),
-      notes: asString(get(row, "Notes")),
-      reversalOfTransactionKey: fit(
-        asString(get(row, "ReversalOfTransactionKey")),
-        60,
-        "ReversalOfTransactionKey",
-        rowNum,
-      ),
-    };
+    try {
+      ledger.push({
+        ledgerEntryDate: asDate(get(row, "LedgerEntryDate"), "LedgerEntryDate", rowNum),
+        investorKey: asInt(get(row, "InvestorKey"), "InvestorKey", rowNum),
+        transactionKey: fit(
+          requireString(get(row, "TransactionKey"), "TransactionKey", rowNum),
+          60,
+          "TransactionKey",
+          rowNum,
+        )!,
+        unitType: fit(
+          requireString(get(row, "UnitType"), "UnitType", rowNum),
+          1,
+          "UnitType",
+          rowNum,
+        )!,
+        unitSubType: fit(asString(get(row, "UnitSubType")), 10, "UnitSubType", rowNum),
+        amount: asMoneyOrNull(get(row, "Amount")),
+        originalIssuance: asBool(get(row, "OriginalIssuance")),
+        quantity: asInt(get(row, "Quantity"), "Quantity", rowNum),
+        notes: asString(get(row, "Notes")),
+        reversalOfTransactionKey: fit(
+          asString(get(row, "ReversalOfTransactionKey")),
+          60,
+          "ReversalOfTransactionKey",
+          rowNum,
+        ),
+      });
+    } catch (e) {
+      errors.push((e as Error).message);
+    }
   });
 
   // -- Referential check ----------------------------------------------------
   for (const [index, entry] of ledger.entries()) {
-    if (!seenKeys.has(entry.investorKey)) {
-      throw new Error(
+    if (!declaredInvestorKeys.has(entry.investorKey)) {
+      errors.push(
         `LedgerEntries row ${index + 2}: InvestorKey ${entry.investorKey} ` +
           `does not exist in Investors.xlsx.`,
       );
     }
+  }
+
+  // -- Report every problem row before aborting -----------------------------
+  if (errors.length > 0) {
+    const shown = errors.slice(0, 100);
+    console.error(
+      `\n${errors.length} problem row(s) found in your spreadsheets:\n`,
+    );
+    for (const err of shown) console.error("  - " + err);
+    if (errors.length > shown.length) {
+      console.error(`  ... and ${errors.length - shown.length} more`);
+    }
+    throw new Error(
+      `Fix these row(s) in your .xlsx files and re-run. Nothing was imported.`,
+    );
   }
 
   // -- Write ----------------------------------------------------------------
