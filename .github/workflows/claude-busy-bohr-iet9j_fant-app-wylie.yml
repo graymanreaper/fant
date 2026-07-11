@@ -44,6 +44,12 @@ jobs:
       - name: Zip standalone bundle
         run: cd .next/standalone && zip -r ../../release.zip .
 
+      # Give App Service's SCM container a moment to settle so a concurrent
+      # management operation (env var change, restart, etc.) doesn't abort
+      # our OneDeploy call — that killed the previous run.
+      - name: Wait for SCM
+        run: sleep 30
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
