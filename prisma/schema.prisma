@@ -22,7 +22,7 @@ model Investor {
   investorAltName  String? @map("InvestorAltName") @db.NVarChar(200)
   investorAddress1 String? @map("InvestorAddress1") @db.NVarChar(300)
   investorCity     String? @map("InvestorCity") @db.NVarChar(100)
-  investorState    String? @map("InvestorState") @db.NVarChar(2)
+  investorState    String? @map("InvestorState") @db.NVarChar(100)
   investorPostCode String? @map("InvestorPostCode") @db.NVarChar(20)
   investorCountry  String? @map("InvestorCountry") @db.NVarChar(100)
   investorEmail    String? @map("InvestorEmail") @db.NVarChar(200)
