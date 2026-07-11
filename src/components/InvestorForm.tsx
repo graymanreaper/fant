@@ -31,7 +31,7 @@ const TEXT_FIELDS: {
   { name: "investorAltName", label: "Alternative Name" },
   { name: "investorAddress1", label: "Address1" },
   { name: "investorCity", label: "City" },
-  { name: "investorState", label: "State", maxLength: 2, placeholder: "2-letter" },
+  { name: "investorState", label: "State", maxLength: 100 },
   { name: "investorPostCode", label: "Post Code" },
   { name: "investorCountry", label: "Country" },
   { name: "investorEmail", label: "Email", type: "email" },
