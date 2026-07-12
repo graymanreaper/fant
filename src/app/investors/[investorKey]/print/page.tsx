@@ -107,15 +107,11 @@ export default async function InvestorPrintPage({
     }
     .print-report table.print-ledger {
       font-family: Calibri, "Segoe UI", system-ui, sans-serif;
-      font-size: 8pt;
-      line-height: 1.15;
+      font-size: 9pt;
     }
     .print-report table.print-ledger th,
     .print-report table.print-ledger td {
-      padding: 1px 4px;
-    }
-    .print-report table.print-ledger th {
-      font-size: 8.5pt;
+      padding: 3px 6px;
     }
     @media print {
       body { background: #fff; }
@@ -228,7 +224,7 @@ export default async function InvestorPrintPage({
                   <th>Class</th>
                   <th>Class Sub</th>
                   <th>Amount</th>
-                  <th style={{ width: 50 }}>Orig. Iss.</th>
+                  <th style={{ width: 60 }}>Orig. Iss.</th>
                   <th>Quantity</th>
                   <th>Notes</th>
                   <th>Counter Party</th>
