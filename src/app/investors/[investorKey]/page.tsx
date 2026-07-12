@@ -32,6 +32,10 @@ export default async function InvestorDetailPage({
   const reversalStatus = await getTransactionReversalStatus(
     ledger.map((entry) => entry.transactionKey),
   );
+  const totalBalance = ledger.reduce(
+    (sum, entry) => sum + (entry.amount ?? 0),
+    0,
+  );
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -100,10 +104,18 @@ export default async function InvestorDetailPage({
               </tbody>
             </table>
             <div className="table-total">
-              <span>Unit Balance</span>
-              <strong className={unitBalance < 0 ? "neg" : ""}>
-                {formatQuantity(unitBalance)}
-              </strong>
+              <span>
+                Unit Balance{" "}
+                <strong className={unitBalance < 0 ? "neg" : ""}>
+                  {formatQuantity(unitBalance)}
+                </strong>
+              </span>
+              <span>
+                Total Balance{" "}
+                <strong className={totalBalance < 0 ? "neg" : ""}>
+                  {formatCurrency(totalBalance)}
+                </strong>
+              </span>
             </div>
           </>
         ) : (
