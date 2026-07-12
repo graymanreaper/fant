@@ -7,7 +7,9 @@ import {
   getUnitBalance,
 } from "@/lib/investors";
 import InvestorForm from "@/components/InvestorForm";
+import CompactTransactionActions from "@/components/CompactTransactionActions";
 import { formatCurrency, formatDate, formatQuantity } from "@/lib/format";
+import { getTransactionReversalStatus } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,10 @@ export default async function InvestorDetailPage({
     getUnitBalance(key),
     getNextInvestorKey(),
   ]);
+  const reversalStatus = await getTransactionReversalStatus(
+    ledger.map((entry) => entry.transactionKey),
+  );
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <div>
@@ -44,57 +50,62 @@ export default async function InvestorDetailPage({
       <div className="card">
         <h2 className="section-title">Ledger History</h2>
         {ledger.length > 0 ? (
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Transaction Key</th>
-                <th>Unit</th>
-                <th>Sub</th>
-                <th>Amount</th>
-                <th>Orig. Iss.</th>
-                <th>Quantity</th>
-                <th>Reversal Of</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ledger.map((entry) => (
-                <tr key={entry.ledgerEntryKey}>
-                  <td>{formatDate(entry.ledgerEntryDate)}</td>
-                  <td>
-                    <Link
-                      href={`/transactions/${encodeURIComponent(
-                        entry.transactionKey,
-                      )}`}
-                    >
-                      {entry.transactionKey}
-                    </Link>
-                  </td>
-                  <td>{entry.unitType}</td>
-                  <td>{entry.unitSubType}</td>
-                  <td className="num">{formatCurrency(entry.amount)}</td>
-                  <td>{entry.originalIssuance ? "Yes" : ""}</td>
-                  <td className={`num ${entry.quantity < 0 ? "neg" : ""}`}>
-                    {formatQuantity(entry.quantity)}
-                  </td>
-                  <td>{entry.reversalOfTransactionKey ?? ""}</td>
-                  <td>{entry.notes ?? ""}</td>
+          <>
+            <table className="grid ledger-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Transaction Key</th>
+                  <th>Class</th>
+                  <th>Class Sub</th>
+                  <th>Amount</th>
+                  <th>Orig. Iss.</th>
+                  <th>Quantity</th>
+                  <th>Reversal Of</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={6} style={{ textAlign: "right", fontWeight: 700 }}>
-                  Unit Balance
-                </td>
-                <td className={`num ${unitBalance < 0 ? "neg" : ""}`}>
-                  <strong>{formatQuantity(unitBalance)}</strong>
-                </td>
-                <td colSpan={2} />
-              </tr>
-            </tfoot>
-          </table>
+              </thead>
+              <tbody>
+                {ledger.map((entry) => (
+                  <tr key={entry.ledgerEntryKey}>
+                    <td>{formatDate(entry.ledgerEntryDate)}</td>
+                    <td>
+                      <Link
+                        href={`/transactions/${encodeURIComponent(
+                          entry.transactionKey,
+                        )}`}
+                      >
+                        {entry.transactionKey}
+                      </Link>
+                    </td>
+                    <td>{entry.unitType}</td>
+                    <td>{entry.unitSubType}</td>
+                    <td className="num">{formatCurrency(entry.amount)}</td>
+                    <td>{entry.originalIssuance ? "Yes" : ""}</td>
+                    <td className={`num ${entry.quantity < 0 ? "neg" : ""}`}>
+                      {formatQuantity(entry.quantity)}
+                    </td>
+                    <td>{entry.reversalOfTransactionKey ?? ""}</td>
+                    <td>{entry.notes ?? ""}</td>
+                    <td>
+                      <CompactTransactionActions
+                        transactionKey={entry.transactionKey}
+                        reversed={reversalStatus.get(entry.transactionKey) ?? false}
+                        today={today}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="table-total">
+              <span>Unit Balance</span>
+              <strong className={unitBalance < 0 ? "neg" : ""}>
+                {formatQuantity(unitBalance)}
+              </strong>
+            </div>
+          </>
         ) : (
           <p className="muted">No ledger entries for this investor.</p>
         )}

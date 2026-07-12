@@ -269,6 +269,11 @@ main {
   cursor: not-allowed;
 }
 
+.btn-compact {
+  padding: 3px 7px;
+  font-size: 12px;
+}
+
 /* ---- Messages ---------------------------------------------------------- */
 .alert {
   padding: 9px 12px;
@@ -316,6 +321,72 @@ table.grid tbody tr:nth-child(even) {
 table.grid td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+table.ledger-table {
+  font-size: 12px;
+}
+
+table.ledger-table th,
+table.ledger-table td {
+  padding: 3px 5px;
+  vertical-align: top;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-width: 150px;
+}
+
+.row-actions-reverse {
+  display: flex;
+  gap: 5px;
+  flex-basis: 100%;
+}
+
+.row-actions-reverse input {
+  max-width: 130px;
+  padding: 3px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.row-actions-message {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.table-total {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 10px;
+  font-weight: 700;
+}
+
+.report-button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.report-block {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 18px;
+}
+
+.print-report table.compact-report {
+  font-size: 8pt;
+}
+
+.print-report table.compact-report th,
+.print-report table.compact-report td {
+  padding: 2px 4px;
 }
 
 .neg {

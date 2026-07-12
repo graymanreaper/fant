@@ -221,8 +221,8 @@ export default async function InvestorPrintPage({
                 <tr>
                   <th>Date</th>
                   <th>Transaction Key</th>
-                  <th>Unit</th>
-                  <th>Sub</th>
+                  <th>Class</th>
+                  <th>Class Sub</th>
                   <th>Amount</th>
                   <th style={{ width: 60 }}>Orig. Iss.</th>
                   <th>Quantity</th>
