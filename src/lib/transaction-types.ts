@@ -35,7 +35,7 @@ export const TRANSACTION_TYPES: Record<TransactionTypeId, TransactionTypeDef> = 
   sale: {
     id: "sale",
     legacyCode: 1,
-    label: "Sale",
+    label: "Member to Member Sale/Transfer (Includes sale back to treasury)",
     keyPrefix: "Sale",
     defaultComment:
       "Sale of ___ Class ___ units by _____ to _____ for $______.",
@@ -52,7 +52,7 @@ export const TRANSACTION_TYPES: Record<TransactionTypeId, TransactionTypeDef> = 
   grant: {
     id: "grant",
     legacyCode: 2,
-    label: "Grant",
+    label: "Incentive Grant/Sale",
     keyPrefix: "Grant",
     defaultComment: "Grant of ___ Class ___ units to _____ for ______.",
     capturesAmount: false,
@@ -68,7 +68,7 @@ export const TRANSACTION_TYPES: Record<TransactionTypeId, TransactionTypeDef> = 
   subscription: {
     id: "subscription",
     legacyCode: 3,
-    label: "Subscription",
+    label: "Company to Investor Sale by Offering (Including debt to equity conversion)",
     keyPrefix: "Subscription",
     defaultComment:
       "Purchase of ___ Class ___ units by _____ for $______. Paid via ______ on _____.",
