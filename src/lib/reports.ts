@@ -26,6 +26,15 @@ function boolAsAccess(value: boolean): number {
   return value ? -1 : 0;
 }
 
+function capChartStatus(investor: {
+  treasury: boolean;
+  repettiAffiliate: boolean;
+}): "Treasury (Unissued)" | "Affiliates" | "Not Affiliates" {
+  if (investor.treasury) return "Treasury (Unissued)";
+  if (investor.repettiAffiliate) return "Affiliates";
+  return "Not Affiliates";
+}
+
 function toLedgerDTO(row: LedgerRow): LedgerEntryDTO {
   return {
     ledgerEntryKey: row.ledgerEntryKey,
@@ -108,23 +117,35 @@ export async function getCapChartSummary() {
     select: {
       unitType: true,
       quantity: true,
-      investor: { select: { inactive: true } },
+      investor: {
+        select: {
+          treasury: true,
+          repettiAffiliate: true,
+        },
+      },
     },
   });
-  const groups = new Map<string, { unitType: string; status: string; sumOfQuan: number }>();
+  const groups = new Map<string, { unitType: string; status: string; sumOfQuantity: number }>();
   for (const row of rows) {
-    const status = row.investor.inactive ? "Inactive" : "Active";
+    const status = capChartStatus(row.investor);
     const key = `${row.unitType}|${status}`;
     const current = groups.get(key) ?? {
       unitType: row.unitType,
       status,
-      sumOfQuan: 0,
+      sumOfQuantity: 0,
     };
-    current.sumOfQuan += row.quantity;
+    current.sumOfQuantity += row.quantity;
     groups.set(key, current);
   }
+  const statusOrder = new Map([
+    ["Affiliates", 0],
+    ["Not Affiliates", 1],
+    ["Treasury (Unissued)", 2],
+  ]);
   return Array.from(groups.values()).sort(
-    (a, b) => a.unitType.localeCompare(b.unitType) || a.status.localeCompare(b.status),
+    (a, b) =>
+      a.unitType.localeCompare(b.unitType) ||
+      (statusOrder.get(a.status) ?? 99) - (statusOrder.get(b.status) ?? 99),
   );
 }
 

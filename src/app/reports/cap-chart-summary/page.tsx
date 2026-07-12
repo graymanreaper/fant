@@ -22,7 +22,7 @@ export default async function CapChartSummaryPage() {
             <tr>
               <th>UnitType</th>
               <th>Status</th>
-              <th>SumOfQuan</th>
+              <th>SumOfQuantity</th>
             </tr>
           </thead>
           <tbody>
@@ -30,8 +30,8 @@ export default async function CapChartSummaryPage() {
               <tr key={`${row.unitType}-${row.status}`}>
                 <td>{row.unitType}</td>
                 <td>{row.status}</td>
-                <td className={`num ${row.sumOfQuan < 0 ? "neg" : ""}`}>
-                  {formatQuantity(row.sumOfQuan)}
+                <td className={`num ${row.sumOfQuantity < 0 ? "neg" : ""}`}>
+                  {formatQuantity(row.sumOfQuantity)}
                 </td>
               </tr>
             ))}
