@@ -13,6 +13,9 @@ export const entraConfigured = Boolean(
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: entraConfigured ? [MicrosoftEntraID] : [],
+  pages: {
+    signIn: "/signin",
+  },
   callbacks: {
     authorized({ auth: session }) {
       // No provider configured -> open access (development).
