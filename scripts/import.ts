@@ -237,10 +237,27 @@ async function main() {
   };
 
   const seenKeys = new Set<number>();
+  const skippedInvestorKeys = new Set<number>();
+  let skippedInvestorRows = 0;
   const investors: InvestorRecord[] = [];
 
   investorRows.forEach((row, index) => {
     const rowNum = index + 2;
+
+    // Rows without a name are treated as empty placeholders and skipped.
+    // The ref-check below still catches ledger entries that reference them.
+    if (asString(get(row, "InvestorName")) === null) {
+      skippedInvestorRows += 1;
+      try {
+        skippedInvestorKeys.add(
+          asInt(get(row, "InvestorKey"), "InvestorKey", rowNum),
+        );
+      } catch {
+        // no key either — nothing to reference
+      }
+      return;
+    }
+
     try {
       const investorKey = asInt(get(row, "InvestorKey"), "InvestorKey", rowNum);
       if (seenKeys.has(investorKey)) {
@@ -336,7 +353,12 @@ async function main() {
 
   // -- Referential check ----------------------------------------------------
   for (const [index, entry] of ledger.entries()) {
-    if (!declaredInvestorKeys.has(entry.investorKey)) {
+    if (skippedInvestorKeys.has(entry.investorKey)) {
+      errors.push(
+        `LedgerEntries row ${index + 2}: InvestorKey ${entry.investorKey} ` +
+          `points at an Investors row with no InvestorName (skipped).`,
+      );
+    } else if (!declaredInvestorKeys.has(entry.investorKey)) {
       errors.push(
         `LedgerEntries row ${index + 2}: InvestorKey ${entry.investorKey} ` +
           `does not exist in Investors.xlsx.`,
@@ -381,7 +403,10 @@ async function main() {
   );
 
   console.log(
-    `\nImport complete: ${investors.length} investors, ${ledger.length} ledger entries.`,
+    `\nImport complete: ${investors.length} investors, ${ledger.length} ledger entries.` +
+      (skippedInvestorRows > 0
+        ? ` (Skipped ${skippedInvestorRows} blank Investors row(s).)`
+        : ""),
   );
 }
 
