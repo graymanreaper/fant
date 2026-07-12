@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { auth, entraConfigured, signOut } from "@/auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FANT — Investor & Ledger System",
+  title: "FantaZ -- Investor & Ledger System",
   description: "Web application migrated from the Microsoft Access database.",
+  icons: {
+    icon: "/fantaz-logo.png",
+    shortcut: "/fantaz-logo.png",
+    apple: "/fantaz-logo.png",
+  },
 };
 
 export default async function RootLayout({
@@ -19,7 +25,17 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <header className="app-header">
-          <span className="brand">FANT</span>
+          <span className="brand">
+            <Image
+              src="/fantaz-logo.png"
+              alt=""
+              width={18}
+              height={18}
+              className="brand-logo"
+              priority
+            />
+            <span>FantaZ</span>
+          </span>
           <nav>
             <Link href="/investors">Investors</Link>
             <Link href="/investors/new">New Member</Link>
