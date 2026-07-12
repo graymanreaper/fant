@@ -102,21 +102,24 @@ export default async function InvestorDetailPage({
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={4} style={{ textAlign: "right", fontWeight: 700 }}>
+                    Total Amount
+                  </td>
+                  <td className={`num ${totalBalance < 0 ? "neg" : ""}`}>
+                    <strong>{formatCurrency(totalBalance)}</strong>
+                  </td>
+                  <td style={{ textAlign: "right", fontWeight: 700 }}>
+                    Total Units
+                  </td>
+                  <td className={`num ${unitBalance < 0 ? "neg" : ""}`}>
+                    <strong>{formatQuantity(unitBalance)}</strong>
+                  </td>
+                  <td colSpan={3} />
+                </tr>
+              </tfoot>
             </table>
-            <div className="table-total">
-              <span>
-                Unit Balance{" "}
-                <strong className={unitBalance < 0 ? "neg" : ""}>
-                  {formatQuantity(unitBalance)}
-                </strong>
-              </span>
-              <span>
-                Total Balance{" "}
-                <strong className={totalBalance < 0 ? "neg" : ""}>
-                  {formatCurrency(totalBalance)}
-                </strong>
-              </span>
-            </div>
           </>
         ) : (
           <p className="muted">No ledger entries for this investor.</p>
