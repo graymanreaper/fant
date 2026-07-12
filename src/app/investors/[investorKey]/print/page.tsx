@@ -4,7 +4,6 @@ import {
   getCounterparties,
   getInvestor,
   getInvestorLedger,
-  getUnitBalance,
 } from "@/lib/investors";
 import { INVESTOR_FLAGS } from "@/lib/investor-fields";
 import { formatCurrency, formatDate, formatQuantity } from "@/lib/format";
@@ -23,10 +22,7 @@ export default async function InvestorPrintPage({
   const investor = await getInvestor(key);
   if (!investor) notFound();
 
-  const [ledger, unitBalance] = await Promise.all([
-    getInvestorLedger(key),
-    getUnitBalance(key),
-  ]);
+  const ledger = await getInvestorLedger(key);
 
   // Ledger sorted oldest first for the printed report.
   const ledgerAsc = [...ledger].sort((a, b) => {
@@ -78,16 +74,44 @@ export default async function InvestorPrintPage({
       margin: 0.55in 0.5in 0.85in 0.5in;
       @bottom-left {
         content: "${generatedDateCss}";
-        font-family: "Segoe UI", system-ui, sans-serif;
+        font-family: Calibri, "Segoe UI", system-ui, sans-serif;
         font-size: 9pt;
         color: #444;
       }
       @bottom-right {
         content: "Page " counter(page) " of " counter(pages);
-        font-family: "Segoe UI", system-ui, sans-serif;
+        font-family: Calibri, "Segoe UI", system-ui, sans-serif;
         font-size: 9pt;
         color: #444;
       }
+    }
+    .print-report {
+      font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+      font-size: 11pt;
+      color: #1a2330;
+    }
+    .print-report h1.page-title {
+      font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+      font-size: 18pt;
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+    .print-report h2.section-title {
+      font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+      font-size: 12pt;
+      font-weight: 700;
+    }
+    .print-report table.grid {
+      font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+      font-size: 11pt;
+    }
+    .print-report table.print-ledger {
+      font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+      font-size: 9pt;
+    }
+    .print-report table.print-ledger th,
+    .print-report table.print-ledger td {
+      padding: 3px 6px;
     }
     @media print {
       body { background: #fff; }
@@ -108,22 +132,40 @@ export default async function InvestorPrintPage({
     }
     .print-classification-list li {
       padding: 3px 0;
+      font-size: 11pt;
     }
     .print-check {
       font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
-      font-size: 12pt;
+      font-size: 11pt;
       text-align: center;
     }
-    .print-balance {
+    .print-totals {
       margin-top: 12px;
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      gap: 24px;
+      font-family: Calibri, "Segoe UI", system-ui, sans-serif;
+      font-size: 11pt;
       font-weight: 700;
-      font-size: 14px;
     }
-    .print-balance .neg {
+    .print-totals .label {
+      color: var(--muted);
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .print-totals .neg {
       color: var(--danger);
     }
   `;
+
+  // Totals for the summary block at the end of the report.
+  let totalClassA = 0;
+  let totalClassB = 0;
+  for (const { entry } of ledgerRows) {
+    if (entry.unitType === "A") totalClassA += entry.quantity;
+    else if (entry.unitType === "B") totalClassB += entry.quantity;
+  }
+  const totalUnits = totalClassA + totalClassB;
 
   return (
     <div>
@@ -136,7 +178,7 @@ export default async function InvestorPrintPage({
         </Link>
       </div>
 
-      <div className="card">
+      <div className="card print-report">
         <h1 className="page-title">Fanta-Z Investor History Report</h1>
 
         <div className="print-summary-grid">
@@ -174,7 +216,7 @@ export default async function InvestorPrintPage({
         </h2>
         {ledgerRows.length > 0 ? (
           <>
-            <table className="grid">
+            <table className="grid print-ledger">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -208,12 +250,26 @@ export default async function InvestorPrintPage({
                 ))}
               </tbody>
             </table>
-            <p className="print-balance">
-              Unit Balance:{" "}
-              <span className={unitBalance < 0 ? "neg" : ""}>
-                {formatQuantity(unitBalance)}
-              </span>
-            </p>
+            <div className="print-totals">
+              <div>
+                <span className="label">Total Class A:</span>
+                <span className={totalClassA < 0 ? "neg" : ""}>
+                  {formatQuantity(totalClassA)}
+                </span>
+              </div>
+              <div>
+                <span className="label">Total Class B:</span>
+                <span className={totalClassB < 0 ? "neg" : ""}>
+                  {formatQuantity(totalClassB)}
+                </span>
+              </div>
+              <div>
+                <span className="label">Total Units:</span>
+                <span className={totalUnits < 0 ? "neg" : ""}>
+                  {formatQuantity(totalUnits)}
+                </span>
+              </div>
+            </div>
           </>
         ) : (
           <p className="muted">No ledger entries for this investor.</p>
