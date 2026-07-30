@@ -9,8 +9,11 @@ type Context = { params: Promise<{ id: string }> };
 async function requireAdmin(): Promise<{ email: string } | Response> {
   if (!entraConfigured) return { email: "dev" };
   const session = await auth();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const role = (session?.user as any)?.role as string | undefined;
+  const userWithAccess = session?.user as
+    | { role?: unknown }
+    | undefined;
+  const role =
+    typeof userWithAccess?.role === "string" ? userWithAccess.role : undefined;
   if (!session?.user || role !== "admin") {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }

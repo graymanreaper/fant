@@ -28,18 +28,65 @@ function envAllowsSignIn(email: string): boolean {
   return domains.some((d) => e.endsWith("@" + d));
 }
 
+function claimString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function emailFromClaims(
+  user?: { email?: string | null; name?: string | null },
+  profile?: unknown,
+  token?: { email?: unknown; name?: unknown },
+): string | undefined {
+  const claims =
+    profile && typeof profile === "object"
+      ? (profile as Record<string, unknown>)
+      : {};
+
+  return (
+    claimString(user?.email) ??
+    claimString(claims.email) ??
+    claimString(claims.preferred_username) ??
+    claimString(claims.upn) ??
+    claimString(claims.unique_name) ??
+    claimString(token?.email)
+  );
+}
+
+function nameFromClaims(
+  user?: { name?: string | null },
+  profile?: unknown,
+  token?: { name?: unknown },
+): string | undefined {
+  const claims =
+    profile && typeof profile === "object"
+      ? (profile as Record<string, unknown>)
+      : {};
+
+  return (
+    claimString(user?.name) ??
+    claimString(claims.name) ??
+    claimString(claims.displayName) ??
+    claimString(token?.name)
+  );
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: entraConfigured ? [MicrosoftEntraID] : [],
   callbacks: {
     // Runs after the OAuth callback. Provision the AppUser row and decide
     // whether the sign-in is allowed. Runs in the Node runtime.
-    async signIn({ user }) {
+    async signIn({ user, profile }) {
       if (!entraConfigured) return true;
-      if (!user?.email) return false;
+      const email = emailFromClaims(user, profile);
+      const name = nameFromClaims(user, profile);
+      if (!email) {
+        console.error("[auth] Microsoft sign-in did not include an email claim.");
+        return false;
+      }
       try {
         const { resolveAccess } = await import("@/lib/access");
-        const access = await resolveAccess(user.email, user.name);
+        const access = await resolveAccess(email, name);
         if (access.status !== "approved") {
           // Non-false return values are used as the post-sign-in redirect URL.
           return "/pending-approval";
@@ -50,22 +97,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // the env allowlist so at least the configured admins can sign in
         // and finish setting things up.
         console.error("[auth] resolveAccess failed on signIn:", error);
-        return envAllowsSignIn(user.email) ? true : "/pending-approval";
+        return envAllowsSignIn(email) ? true : "/pending-approval";
       }
     },
 
     // JWT claims. We fold role + status into the token so middleware (Edge)
     // can gate access without touching the database.
-    async jwt({ token, user }) {
-      const email =
-        (user?.email as string | undefined) ??
-        (token.email as string | undefined);
-      const name =
-        (user?.name as string | null | undefined) ??
-        (token.name as string | null | undefined);
+    async jwt({ token, user, profile }) {
+      const email = emailFromClaims(user, profile, token);
+      const name = nameFromClaims(user, profile, token);
 
       // First sign-in OR upgrade legacy tokens issued before we stored role.
-      if (email && (user?.email || !token.role)) {
+      if (email && (user?.email || profile || !token.role)) {
+        token.email = email;
+        if (name) token.name = name;
         try {
           const { resolveAccess } = await import("@/lib/access");
           const access = await resolveAccess(email, name);
@@ -89,10 +134,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     async session({ session, token }) {
       if (session.user) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).role = token.role ?? "user";
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (session.user as any).status = token.status ?? "pending";
+        const userWithAccess = session.user as typeof session.user & {
+          role?: unknown;
+          status?: unknown;
+        };
+        userWithAccess.role = token.role ?? "user";
+        userWithAccess.status = token.status ?? "pending";
       }
       return session;
     },
@@ -108,10 +155,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       if (!session?.user) return false;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const status = (session.user as any).status as string | undefined;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const role = (session.user as any).role as string | undefined;
+      const userWithAccess = session.user as typeof session.user & {
+        role?: unknown;
+        status?: unknown;
+      };
+      const status =
+        typeof userWithAccess.status === "string"
+          ? userWithAccess.status
+          : undefined;
+      const role =
+        typeof userWithAccess.role === "string" ? userWithAccess.role : undefined;
 
       if (status !== "approved") {
         return Response.redirect(new URL("/pending-approval", request.url));

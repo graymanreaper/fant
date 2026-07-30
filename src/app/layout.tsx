@@ -19,8 +19,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = entraConfigured ? await auth() : null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const role = (session?.user as any)?.role as string | undefined;
+  const userWithAccess = session?.user as
+    | { role?: unknown }
+    | undefined;
+  const role =
+    typeof userWithAccess?.role === "string" ? userWithAccess.role : undefined;
   const showAdmin = !entraConfigured || role === "admin";
 
   return (

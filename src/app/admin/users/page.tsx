@@ -9,8 +9,13 @@ export default async function AdminUsersPage() {
   // Only admins can see this — belt and suspenders on top of middleware.
   if (entraConfigured) {
     const session = await auth();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const role = (session?.user as any)?.role as string | undefined;
+    const userWithAccess = session?.user as
+      | { role?: unknown }
+      | undefined;
+    const role =
+      typeof userWithAccess?.role === "string"
+        ? userWithAccess.role
+        : undefined;
     if (role !== "admin") notFound();
   }
 
