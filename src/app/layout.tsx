@@ -19,6 +19,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = entraConfigured ? await auth() : null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const role = (session?.user as any)?.role as string | undefined;
+  const showAdmin = !entraConfigured || role === "admin";
 
   return (
     <html lang="en">
@@ -31,6 +34,7 @@ export default async function RootLayout({
             <Link href="/transactions">Transactions</Link>
             <Link href="/transactions/new">New Transaction</Link>
             <Link href="/reports">Reports</Link>
+            {showAdmin ? <Link href="/admin/users">Admin</Link> : null}
           </nav>
           <span className="spacer" />
           {session?.user ? (

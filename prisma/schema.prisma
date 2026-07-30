@@ -74,3 +74,24 @@ model LedgerEntry {
   @@index([transactionKey])
   @@map("LedgerEntries")
 }
+
+/// Application user directory. One row per email address that has ever
+/// signed in through Microsoft Entra ID. Populated automatically on sign-in;
+/// non-approved users are held on the /pending-approval page until an
+/// administrator flips their status to "approved".
+model AppUser {
+  id         Int       @id @default(autoincrement()) @map("Id")
+  email      String    @unique @map("Email") @db.NVarChar(320)
+  name       String?   @map("Name") @db.NVarChar(200)
+  /// "pending" | "approved" | "rejected"
+  status     String    @default("pending") @map("Status") @db.NVarChar(20)
+  /// "user" | "admin"
+  role       String    @default("user") @map("Role") @db.NVarChar(20)
+  createdAt  DateTime  @default(now()) @map("CreatedAt")
+  approvedAt DateTime? @map("ApprovedAt")
+  /// Email of the admin who approved, or "auto" when the domain/email
+  /// was on the AUTH_ALLOWED_DOMAINS / AUTH_ADMIN_EMAILS lists.
+  approvedBy String?   @map("ApprovedBy") @db.NVarChar(320)
+
+  @@map("AppUsers")
+}
