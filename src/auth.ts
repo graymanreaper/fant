@@ -13,6 +13,21 @@ export const entraConfigured = Boolean(
 // Paths that stay accessible to signed-in-but-not-yet-approved users.
 const PENDING_ALLOWED_PATHS = new Set<string>(["/pending-approval"]);
 
+/** Pure env-var fallback used when the AppUsers table isn't reachable. */
+function envAllowsSignIn(email: string): boolean {
+  const e = email.toLowerCase();
+  const admins = (process.env.AUTH_ADMIN_EMAILS ?? "")
+    .toLowerCase()
+    .split(/[,;\s]+/)
+    .filter(Boolean);
+  if (admins.includes(e)) return true;
+  const domains = (process.env.AUTH_ALLOWED_DOMAINS ?? "")
+    .toLowerCase()
+    .split(/[,;\s]+/)
+    .filter(Boolean);
+  return domains.some((d) => e.endsWith("@" + d));
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: entraConfigured ? [MicrosoftEntraID] : [],
@@ -22,13 +37,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user }) {
       if (!entraConfigured) return true;
       if (!user?.email) return false;
-      const { resolveAccess } = await import("@/lib/access");
-      const access = await resolveAccess(user.email, user.name);
-      if (access.status !== "approved") {
-        // Non-false return values are used as the post-sign-in redirect URL.
-        return "/pending-approval";
+      try {
+        const { resolveAccess } = await import("@/lib/access");
+        const access = await resolveAccess(user.email, user.name);
+        if (access.status !== "approved") {
+          // Non-false return values are used as the post-sign-in redirect URL.
+          return "/pending-approval";
+        }
+        return true;
+      } catch (error) {
+        // AppUsers table not yet created, or DB unreachable. Fall back to
+        // the env allowlist so at least the configured admins can sign in
+        // and finish setting things up.
+        console.error("[auth] resolveAccess failed on signIn:", error);
+        return envAllowsSignIn(user.email) ? true : "/pending-approval";
       }
-      return true;
     },
 
     // JWT claims. We fold role + status into the token so middleware (Edge)
@@ -48,11 +71,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const access = await resolveAccess(email, name);
           token.role = access.role;
           token.status = access.status;
-        } catch {
-          // AppUsers table may not exist yet; default to pending so admin
-          // can promote once db:push has been run.
-          if (!token.role) token.role = "user";
-          if (!token.status) token.status = "pending";
+        } catch (error) {
+          // AppUsers table not reachable — fall back to env allowlist so
+          // configured admins still get in before db:push has been run.
+          console.error("[auth] resolveAccess failed in jwt callback:", error);
+          if (envAllowsSignIn(email)) {
+            token.role = "admin";
+            token.status = "approved";
+          } else {
+            token.role = "user";
+            token.status = "pending";
+          }
         }
       }
       return token;
